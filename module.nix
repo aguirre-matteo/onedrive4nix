@@ -1,18 +1,31 @@
-{ lib, pkgs, config , ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib)
-  mkIf mkEnableOption mkPackageOption mkOption;
+    mkIf
+    mkEnableOption
+    mkPackageOption
+    mkOption
+    types
+    concatStringsSep
+    mapAttrsToList
+    ;
 
   cfg = config.programs.onedrive;
 
-  formatter = pkgs.formats.keyValue { indent = " "; };
-in 
+  attrToString = name: value: ''${name} = "${value}"'';
+  generateConfig = settings: concatStringsSep "\n" (mapAttrsToList attrToString settings) + "\n";
+in
 {
   options.programs.onedrive = {
     enable = mkEnableOption "onedrive";
     package = mkPackageOption pkgs "onedrive" { nullable = true; };
     settings = mkOption {
-      type = formatter.type;
+      type = with types; attrsOf str;
       default = { };
       example = ''
         {
@@ -35,10 +48,14 @@ in
   };
 
   config = mkIf cfg.enable {
-    home.packages = [ cfg.packages ];
+    assertions = [
+      (lib.hm.assertions.assertPlatform "programs.onedrive" pkgs lib.platforms.linux)
+    ];
+
+    home.packages = [ cfg.package ];
 
     xdg.configFile = mkIf (cfg.settings != { }) {
-      "onedrive/config".source = (formatter.generate "onedrive_config" cfg.settings);
+      "onedrive/config".text = generateConfig cfg.settings;
     };
   };
 }
