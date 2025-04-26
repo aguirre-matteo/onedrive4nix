@@ -17,10 +17,13 @@ let
 
   cfg = config.programs.onedrive;
 
-  attrToString = name: value: ''${name} = "${value}"'';
-  generateConfig = settings: concatStringsSep "\n" (mapAttrsToList attrToString settings) + "\n";
+  generateConfig = lib.generators.toKeyValue {
+    mkKeyValue = name: value: ''${name} = "${value}"'';
+  };
 in
 {
+  meta.maintainers = with lib.hm.maintainers; [ aguirre-matteo ];
+
   options.programs.onedrive = {
     enable = mkEnableOption "onedrive";
     package = mkPackageOption pkgs "onedrive" { nullable = true; };
@@ -52,7 +55,7 @@ in
       (lib.hm.assertions.assertPlatform "programs.onedrive" pkgs lib.platforms.linux)
     ];
 
-    home.packages = [ cfg.package ];
+    home.packages = mkIf (cfg.package != null) [ cfg.package ];
 
     xdg.configFile = mkIf (cfg.settings != { }) {
       "onedrive/config".text = generateConfig cfg.settings;
