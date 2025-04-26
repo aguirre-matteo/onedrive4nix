@@ -1,5 +1,7 @@
 # Onedrive on Nix
 ## What is this?
+> [!NOTE]
+> This module has been merged into Home-Manager's unstable branch
 
 This repository offers a Home-Manager module for configurating
 the [OneDrive Client for Linux](https://github.com/abraunegg/onedrive) using Nix.
