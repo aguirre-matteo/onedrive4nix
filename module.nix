@@ -22,8 +22,6 @@ let
   };
 in
 {
-  meta.maintainers = with lib.hm.maintainers; [ aguirre-matteo ];
-
   options.programs.onedrive = {
     enable = mkEnableOption "onedrive";
     package = mkPackageOption pkgs "onedrive" { nullable = true; };
